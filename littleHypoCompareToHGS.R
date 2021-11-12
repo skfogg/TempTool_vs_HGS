@@ -16,19 +16,22 @@ hyporheicBins(18, 2, 60, 182*86400, 0.25, hyporheicExchange = 4.8, b=-1.39)
 
 
 ### HGS ###
-hgshz <- readRDS("HGSTempTool_Run3.RData")
+hgs_output_location <- "C:/Users/skati/Box/TempTool_vs_HGS_hgs_output/hgs_output"
+hgshz <- readRDS(paste0(hgs_output_location, "/HGSTempTool_Run3.RData"))
 dim(hgshz)
 
 hgshz[,1,5,1,"X"]
 
-v <- readRDS("HGSTempTool_Run3_velocity.RData")
+v <- readRDS(paste0(hgs_output_location, "/HGSTempTool_Run3_velocity.RData"))
 dim(v)
 plot(v[,1,5,1,"Vx"])
 plot(v[,1,5,1,"Vz"], type = "l")
 
-max(v[,1,5,1,"Vx"])
-min(v[,1,5,1,"Vx"])
-vx <- (v[1,1,5,1,"Vx"])
+(max_vx <- max(v[,1,5,1,"Vx"]))
+(min_vx <- min(v[,1,5,1,"Vx"]))
+(mean_vx <- mean(v[,1,5,1,"Vx"]))
+
+(vx <- (v[1,1,5,1,"Vx"]))
 
 vx*0.25
 
@@ -81,7 +84,7 @@ saveRDS(hgsbinned, "hgsbinned.RData")
 ### TempTool ###
 #connect <- odbcConnect("TempToolFourANSI", uid="root", pwd="MSUFLL!!")
 
-load("TempTool_oneOutputChannel.RData")
+load("temptool_output/TempTool_oneOutputChannel.RData")
 tthz <- oneChannel
 time2plot <- "2016"
 temptoolcolors <- hcl.colors(18, palette = "viridis")
@@ -107,7 +110,7 @@ plot.zoo(hgsbinned$hgsbin3,
          main = "HGS Hyporheic Temperatures")
 for(i in 1:16){
   lines(as.zoo(hgsbinned[[i]]),
-        col = temptoolcolors[i],
+        col = temptoolcolors[3:18][i],
         lwd = 2)
 }
 dev.off()
@@ -115,15 +118,15 @@ dev.off()
 ## Bin to Bin comparison
 for(temptoolbin in 3:18){
 hgsbin <- temptoolbin-2
-png(paste0("BinCompare", temptoolbin, ".png"),
+png(paste0("BinCompare", temptoolbin, "_August13.png"),
     width = 600*5,
     height = 300*5,
     res=72*5)
-plot.zoo(tthz[[temptoolbin]]$svValue[time2plot],
+plot.zoo(tthz[[temptoolbin]]$svValue["2016-08-13"],
          ylab = "Temperature (C)",
          ylim = c(0,22),
          main = paste0("TSZ ", temptoolbin, ": ", round(littleHypoBins$from[temptoolbin]), "-", round(littleHypoBins$to[temptoolbin]), " seconds"))
-lines(as.zoo(hgsbinned[[hgsbin]]),
+lines(as.zoo(hgsbinned[[hgsbin]]["2016-08-13"]),
       col = "gold", lwd =2)
 text(mdy_hms("02-20-2016 00:00:00"), 15, labels = paste0("TT mean WA:", round(littleHypoBins$meanWaterAge[temptoolbin])))
 text(mdy_hms("02-20-2016 00:00:00"), 12, labels = paste0("HGS mean WA: ", round(mean(hgsrt[with(hgsrt, ttbin == temptoolbin),]$rt))))
@@ -131,6 +134,23 @@ text(mdy_hms("02-20-2016 00:00:00"), 12, labels = paste0("HGS mean WA: ", round(
 dev.off()
 }
 
+
+somecolors <- hcl.colors(19)
+hgshzTS_3 <- xts(zoo(hgshz[3,1,5,,"temp"]), order.by = hgstimes)
+
+plotT <- ""
+
+plot.zoo(tthz[[3]]$svValue["2016-06/2016-08"], col = somecolors[1])
+lines(as.zoo(hgshzTS_3["2016-06/2016-08"]), col = somecolors[12])
+lines(as.zoo(hgsbinned[[1]]["2016-06/2016-08"]), col = somecolors[15])
+
+plot.zoo(tthz[[4]]$svValue["2016-08-13"], col = somecolors[1])
+# lines(as.zoo(hgshzTS_3["2016-06/2016-08"]), col = somecolors[12])
+lines(as.zoo(hgsbinned[[2]]["2016-08-13"]), col = somecolors[15])
+
+
+plot(coredata(tthz[[3]]$svValue["2016-08-13"]) - coredata(hgshzTS_3["2016-08-13"]))
+abline(h = 0)
 
 ## Bin3 daily mean
 plot.zoo(apply.daily(tthz$tsz3Temp$svValue[time2plot], mean))
@@ -174,3 +194,26 @@ for (i in 2:576){
 # }
 # plot(means1)
 
+riverInput <- read.table("IskulpaaRiverTemp.txt", skip = 1, col.names = c("s", "e", "temp") )
+riverin <- xts(zoo(riverInput$temp), order.by = mdy_hms("01-01-2015 00:00:00")+riverInput$s)
+
+hgshzTS_1 <- xts(zoo(hgshz[1,1,5,,"temp"]), order.by = hgstimes)
+
+
+plot.zoo(riverin["2016-08-01"], col = "dodgerblue")
+#lines(as.zoo(tthz$cTemp2$svValue["2016-08-01"]), col = "goldenrod")
+lines(as.zoo(tthz$tsz1Temp$svValue["2016-08-01"]), col = "gold")
+lines(as.zoo(hgshz[]))
+
+plot.zoo(riverin["2016"], col = "dodgerblue")
+lines(as.zoo(hgshzTS_1), col = "magenta")
+
+
+# not sure what refTempInput is:
+refTempInput <- read.table("refTempInput.txt", skip = 1, col.names = c("s", "e", "temp") )
+refT <- xts(zoo(refTempInput$temp), order.by = mdy_hms("01-01-2015 00:00:00")+refTempInput$s)
+
+plot.zoo(refT["2016"])
+lines(as.zoo(riverin["2016"]), col = "red")
+
+mean_vx*86400
