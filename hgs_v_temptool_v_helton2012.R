@@ -67,7 +67,7 @@ plot(phaseDay ~ I(RT/86400), tt_phases, log = "x")
 calcrange <- function(x) max(x)-min(x)
 tt_ranges <- data.frame(WA = littlehypobins$meanWaterAge, RT = littlehypobins$meanResTime, range = numeric(18))
 for(i in 2:19){
-  tt_ranges$range[i-1] <- round(max(tt_dailymeans[[i-1]]$svValue) - min(tt_dailymeans[[i-1]]$svValue), 2)
+  tt_ranges$range[i-1] <- round(max(tt_dailymeans[[i-1]]$svValue["2016"]) - min(tt_dailymeans[[i-1]]$svValue["2016"]), 2)
 }
 
 ########################################
@@ -83,6 +83,16 @@ lines(16.2*exp(1)^(-0.0065*seq(1,365)), col = "dodgerblue")
 legend("topleft", c("TempTool Output", "Helton 2012 Best Fit Line"),
        pch = c(1,NA), lty = c(NA,1), col = c("black", "dodgerblue"))
 
+### Same plot, just scaled to the max RT of TempTool
+plot(range ~ I(RT/86400),
+     tt_ranges,
+     ylim = c(0, 20),
+     xlim = c(0, 150),
+     ylab = "Temperature Range (C)",
+     xlab = "Residence Time (Days)")
+lines(16.2*exp(1)^(-0.0065*seq(1,150)), col = "dodgerblue")
+legend("topleft", c("TempTool Output", "Helton 2012 Best Fit Line"),
+       pch = c(1,NA), lty = c(NA,1), col = c("black", "dodgerblue"))
 
 #######################
 #######################
@@ -212,4 +222,56 @@ points(range~I(RT/86400), tt_ranges)
 lines(16.2*exp(1)^(-0.0065*seq(1,365)), col = "dodgerblue")
 legend("topright", c("TempTool Output", "HGS Output", "Helton 2012 Best Fit Line"),
        pch = c(1,1,NA), lty = c(NA, NA,1), col = c("black","orangered3", "dodgerblue"))
+
+
+#### NOW ####
+### Don't use the mean binned value for HGS output, just calc phase shift and
+### temperature range for the raw residence time and temperature signal associated with it
+hgstimes
+plot(hgstimes,hgshz[1,2,5,,"temp"], type = "l")
+for(i in 1:221){
+  lines(hgstimes, hgshz[i,2,5,,"temp"], col = hcl.colors(221)[i])
+}
+
+plot(hgsResTime, hgshz[,2,5,1,"temp"], type = "l")
+for(i in 1:576){
+  lines(hgsResTime, hgshz[,2,5,i,"temp"])
+}
+
+hgsbins <- TSZStats(TSZs = hgsResTime[-1],
+                    tau_0 = hgsResTime[-1][1],
+                    tau_n = hgsResTime[-1][220],
+                    storage = 11.98,
+                    alpha = 1.39)
+
+plot(hgsbins$waterStorage)
+plot(hgsbins$returning ~ hgsbins$meanResTime)
+
+hgs_upwelling_temp <- numeric(576)
+for(i in 1:576){
+  hgs_upwelling_temp[i] <- weighted.mean(hgshz[2:220,2,5,i,"temp"], hgsbins$returning)
+}
+
+hgs_upwelling <- xts(zoo(hgs_upwelling_temp, order.by = hgstimes))
+
+plot(as.zoo(littlehypo$cTemp2$svValue["2016"]), col = "dodgerblue")
+lines(as.zoo(hgs_upwelling))
+
+
+plot.zoo(littlehypo$cTemp2$svValue["2016-08-13"], col = "dodgerblue")
+lines(as.zoo(hgs_upwelling["2016-08-13"]))
+
+plot.zoo(hgs_upwelling["2016-08-13"] - littlehypo$cTemp2$svValue["2016-08-13"],
+         ylim = c(-1,1),
+         col = "red")
+abline(h = 0, lty = 2)
+
+
+#tt_upwelling
+weighted.mean(c(littlehypo[[2]]$svValue["2016"][1]))
+
+
+for (i in 2:19){
+  littlehypo[[i]]$svValue["2016"]
+}
 
