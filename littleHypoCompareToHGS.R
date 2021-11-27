@@ -118,10 +118,10 @@ dev.off()
 ## Bin to Bin comparison
 for(temptoolbin in 3:18){
 hgsbin <- temptoolbin-2
-png(paste0("BinCompare", temptoolbin, "_August13.png"),
-    width = 600*5,
-    height = 300*5,
-    res=72*5)
+# png(paste0("BinCompare", temptoolbin, "_August13.png"),
+#     width = 600*5,
+#     height = 300*5,
+#     res=72*5)
 plot.zoo(tthz[[temptoolbin]]$svValue["2016-08-13"],
          ylab = "Temperature (C)",
          ylim = c(0,22),
@@ -131,7 +131,7 @@ lines(as.zoo(hgsbinned[[hgsbin]]["2016-08-13"]),
 text(mdy_hms("02-20-2016 00:00:00"), 15, labels = paste0("TT mean WA:", round(littleHypoBins$meanWaterAge[temptoolbin])))
 text(mdy_hms("02-20-2016 00:00:00"), 12, labels = paste0("HGS mean WA: ", round(mean(hgsrt[with(hgsrt, ttbin == temptoolbin),]$rt))))
 
-dev.off()
+# dev.off()
 }
 
 
