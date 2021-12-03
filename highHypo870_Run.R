@@ -13,9 +13,9 @@ library(xts)
 library(lubridate)
 library(temptool)
 
-connect <- odbcConnect("TempToolFourANSI", uid="root", pwd="MSUFLL!!")
+connect <- odbcConnect("TempToolFourANSI", uid="root", pwd="Kraydie")
 theseBins <- hyporheicBins(18, 2, 60, 182*86400, 0.25, 35.94, b=-1.39)
-load("C:\\Users\\t24x137\\Desktop\\Old Tower Desktop Folders\\TempToolModelTesting2\\highHypoInitTemps.RData")
+load("highHypoInitTemps.RData")
 
 setSkeleton(firstBin = 1,
             lastBin = 18,
@@ -56,7 +56,7 @@ setTiming(odbcConnection = connect,
 assign("cTemp", tts(odbcConnection = connect,
                     holonName = "channel_0001",
                     tableName = "temp_signal_output",
-                    runID = "high hyporheic exchange, no shade, sedimentSpHeat 870",
+                    runID = "high hyporheic exchange, no shade, sedimentSpHeat 870, porosity 30%",
                     xtsIndex = seq(ymd_hms("2014-01-01 00:00:00"), ymd_hms("2018-01-01 00:00:00"), by = 3600)))
 
 for(z in 1:18){
@@ -86,9 +86,9 @@ for(i in 1:length(objectNames)){
   outList[[i]] <- get(objectNames[i])
 }
 
-highHypo870 <- outList
+highHypo30porosity <- outList
 
-save(highHypo870, file = "C:/Users/t24x137/Desktop/TempTool_2020/highHypo870.RData")
+save(highHypo30porosity, file = "temptool_output/highHypo30porosity.RData")
 
 
 
