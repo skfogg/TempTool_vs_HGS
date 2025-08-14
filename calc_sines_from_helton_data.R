@@ -47,7 +47,6 @@ for(i in 3:length(wvs)){
 }
 as.factor(waves$res_time)
 
-sort()
 
 plot(wvs[[1]]$jday, wvs[[1]]$temp, type = "l")
 
@@ -73,14 +72,14 @@ abline(v = helton$Phase)
 #### Start over ####
 
 get_waves <- function(tester){
-  amp <- tester$FitRange/2
-  maxt <- tester$FitMean + amp
-  mint <- tester$FitMean - amp
+  amp <- tester$Max_minus_Min/2
+  maxt <- tester$MathMean + amp
+  mint <- tester$MathMean - amp
   maxday <- tester$Phase
   minday <- tester$Phase - (365/2)
   meanday <- (maxday - minday)/2 + minday
   meanday2 <- (maxday - minday)/2 + maxday
-  meant <- tester$FitMean
+  meant <- tester$MathMean
   phase <- (tester$Phase - 365/4) * (pi/180)
 
   f <- 1/(86400*365)
@@ -116,6 +115,9 @@ plot(allwaves[[1]], type = "l")
 mapply(function(x, c) lines(x, col = c),
        allwaves,
        hcl.colors(19, "Blues"))
+helton2012_sine_models <- allwaves
+names(helton2012_sine_models) <- round(helton$Avg_Res_Time_days, 1)
+save(helton2012_sine_models, file = "helton2012_sine_models_truemeanamps.RData")
 
 plot(rep(helton$Avg_Res_Time_days[1], times = 4), allwaves[[1]][c(18,110,201,292)],
      xlim = c(0,305),
@@ -130,6 +132,8 @@ orderedwaves <- data.frame(rt = rep(sort(helton$Avg_Res_Time_days), each = 4),
 for(i in 1:nrow(helton)){
   orderedwaves[orderedwaves$rt == helton$Avg_Res_Time_days[i],]$temp <- allwaves[[i]][c(18,110,201,292)]
 }
+helton_sine_models_4days <- orderedwaves
+save(helton_sine_models_4days, file = "helton_sine_models_4days_true.RData")
 
 plot(c(mean(subset(orderedwaves, jday == 18)[1:3,]$rt), subset(orderedwaves, jday == 18)[4:19,]$rt),
      c(mean(subset(orderedwaves, jday == 18)[1:3,]$temp), subset(orderedwaves, jday == 18)[4:19,]$temp),

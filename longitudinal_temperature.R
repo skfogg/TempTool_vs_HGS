@@ -102,6 +102,9 @@ lowsmooth <- returnlong(lowhypo, bindf = littlehypobins)
 medsmooth <- returnlong(medhypo, bindf = medhypobins)
 highsmooth <- returnlong(highhypo, bindf = highhypobins)
 
+save(highsmooth, file = "highsmooth.RData")
+save(medsmooth, file = "medsmooth.RData")
+save(lowsmooth, file = "lowsmooth.RData")
 
 highrawt <- rawlongtemps(highhypo, bindf = highhypobins)
 helcol <- hcl.colors(4, "Cork")
